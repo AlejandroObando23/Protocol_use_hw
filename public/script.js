@@ -137,7 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
-            const res = await fetch(\`\${API_BASE}/customer\`, {
+            const res = await fetch(`${API_BASE}/customer`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(customerData)
@@ -160,7 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const id = e.target.getAttribute('data-id');
             if (confirm('Are you sure you want to delete this customer?')) {
                 try {
-                    const res = await fetch(\`\${API_BASE}/customer/\${id}\`, { method: 'DELETE' });
+                    const res = await fetch(`${API_BASE}/customer/${id}`, { method: 'DELETE' });
                     if (res.ok) {
                         init();
                     } else {
@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
-            const res = await fetch(\`\${API_BASE}/customer/\${id}\`, {
+            const res = await fetch(`${API_BASE}/customer/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(customerData)

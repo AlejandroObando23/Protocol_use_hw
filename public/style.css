@@ -175,3 +175,86 @@ tr:last-child td {
     text-align: center;
     color: var(--text-muted);
 }
+
+/* Form Styles */
+.add-customer-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    border-radius: 6px;
+    margin-bottom: 2rem;
+}
+
+.add-customer-card h2 {
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+.customer-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    flex: 1;
+    min-width: 120px;
+}
+
+.form-group label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.customer-form button {
+    height: 38px;
+}
+
+/* Action Buttons */
+.action-btn {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.8rem;
+    margin-right: 0.5rem;
+    border-radius: 4px;
+}
+.btn-edit { background: #3b82f6; color: white; border: none; }
+.btn-edit:hover { background: #2563eb; }
+.btn-delete { background: #ef4444; color: white; border: none; }
+.btn-delete:hover { background: #dc2626; }
+
+/* Modal Styles */
+.modal {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+.modal.hidden {
+    display: none;
+}
+.modal-content {
+    background: var(--bg-card);
+    padding: 2rem;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 400px;
+}
+.modal-content h2 { margin-bottom: 1.5rem; }
+.modal-form {
+    flex-direction: column;
+    align-items: stretch;
+}
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}

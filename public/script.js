@@ -11,6 +11,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchResults = document.getElementById('search-results');
     const refreshBtn = document.getElementById('refresh-btn');
 
+    const addForm = document.getElementById('add-form');
+    const editModal = document.getElementById('edit-modal');
+    const editForm = document.getElementById('edit-form');
+    const cancelEditBtn = document.getElementById('cancel-edit-btn');
+
     const API_BASE = '/customerStore';
 
     const formatMoney = (amount) => {
@@ -42,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const loadAllCustomers = async () => {
         try {
-            customersBody.innerHTML = '<tr><td colspan="3" class="text-center">Loading data...</td></tr>';
+            customersBody.innerHTML = '<tr><td colspan="4" class="text-center">Loading data...</td></tr>';
 
             const res = await fetch(`${API_BASE}/customer`);
             const data = await res.json();
@@ -50,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
             customersBody.innerHTML = '';
 
             if (data.length === 0) {
-                customersBody.innerHTML = '<tr><td colspan="3" class="text-center">No customers found.</td></tr>';
+                customersBody.innerHTML = '<tr><td colspan="4" class="text-center">No customers found.</td></tr>';
                 return;
             }
 
@@ -60,11 +65,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td>${customer.name}</td>
                     <td>${customer.age}</td>
                     <td>${formatMoney(customer['moneySpent'])}</td>
+                    <td>
+                        <button class="action-btn btn-edit" data-id="${customer.id}" data-name="${customer.name}" data-age="${customer.age}" data-spent="${customer.moneySpent}">Edit</button>
+                        <button class="action-btn btn-delete" data-id="${customer.id}">Delete</button>
+                    </td>
                 `;
                 customersBody.appendChild(tr);
             });
         } catch (error) {
-            customersBody.innerHTML = '<tr><td colspan="3" class="text-center" style="color:red;">Error connecting to API.</td></tr>';
+            customersBody.innerHTML = '<tr><td colspan="4" class="text-center" style="color:red;">Error connecting to API.</td></tr>';
         }
     };
 
@@ -115,6 +124,97 @@ document.addEventListener('DOMContentLoaded', () => {
     refreshBtn.addEventListener('click', () => {
         loadStats();
         loadAllCustomers();
+    });
+
+    // Add Customer Form Submit
+    addForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const customerData = {
+            id: Number(document.getElementById('add-id').value),
+            name: document.getElementById('add-name').value,
+            age: Number(document.getElementById('add-age').value),
+            moneySpent: Number(document.getElementById('add-spent').value)
+        };
+
+        try {
+            const res = await fetch(\`\${API_BASE}/customer\`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(customerData)
+            });
+            if (res.ok) {
+                addForm.reset();
+                init();
+            } else {
+                alert('Failed to add customer.');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Error adding customer.');
+        }
+    });
+
+    // Table Actions (Edit & Delete via Event Delegation)
+    customersBody.addEventListener('click', async (e) => {
+        if (e.target.classList.contains('btn-delete')) {
+            const id = e.target.getAttribute('data-id');
+            if (confirm('Are you sure you want to delete this customer?')) {
+                try {
+                    const res = await fetch(\`\${API_BASE}/customer/\${id}\`, { method: 'DELETE' });
+                    if (res.ok) {
+                        init();
+                    } else {
+                        alert('Failed to delete customer.');
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+        } else if (e.target.classList.contains('btn-edit')) {
+            const id = e.target.getAttribute('data-id');
+            const name = e.target.getAttribute('data-name');
+            const age = e.target.getAttribute('data-age');
+            const spent = e.target.getAttribute('data-spent');
+
+            document.getElementById('edit-id').value = id;
+            document.getElementById('edit-name').value = name;
+            document.getElementById('edit-age').value = age;
+            document.getElementById('edit-spent').value = spent;
+
+            editModal.classList.remove('hidden');
+        }
+    });
+
+    // Modal Actions
+    cancelEditBtn.addEventListener('click', () => {
+        editModal.classList.add('hidden');
+    });
+
+    editForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('edit-id').value;
+        const customerData = {
+            name: document.getElementById('edit-name').value,
+            age: Number(document.getElementById('edit-age').value),
+            moneySpent: Number(document.getElementById('edit-spent').value)
+        };
+
+        try {
+            const res = await fetch(\`\${API_BASE}/customer/\${id}\`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(customerData)
+            });
+            if (res.ok) {
+                editModal.classList.add('hidden');
+                init();
+            } else {
+                alert('Failed to update customer.');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Error updating customer.');
+        }
     });
 
     init();

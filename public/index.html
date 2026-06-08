@@ -28,6 +28,29 @@
                 </div>
             </div>
 
+            <div class="add-customer-card">
+                <h2>Add New Customer</h2>
+                <form id="add-form" class="customer-form">
+                    <div class="form-group">
+                        <label for="add-id">ID</label>
+                        <input type="number" id="add-id" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="add-name">Name</label>
+                        <input type="text" id="add-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="add-age">Age</label>
+                        <input type="number" id="add-age" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="add-spent">Money Spent ($)</label>
+                        <input type="number" id="add-spent" required step="0.01">
+                    </div>
+                    <button type="submit" id="add-submit-btn">Add Customer</button>
+                </form>
+            </div>
+
             <div class="search-area">
                 <select id="search-type">
                     <option value="name">Name</option>
@@ -51,17 +74,45 @@
                             <th>Name</th>
                             <th>Age</th>
                             <th>Spent</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="customers-body">
                         <tr>
-                            <td colspan="3" class="text-center">Loading...</td>
+                            <td colspan="4" class="text-center">Loading...</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </main>
     </div>
+
+    <!-- Edit Modal -->
+    <div id="edit-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>Edit Customer</h2>
+            <form id="edit-form" class="customer-form modal-form">
+                <input type="hidden" id="edit-id">
+                <div class="form-group">
+                    <label for="edit-name">Name</label>
+                    <input type="text" id="edit-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-age">Age</label>
+                    <input type="number" id="edit-age" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-spent">Money Spent ($)</label>
+                    <input type="number" id="edit-spent" required step="0.01">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" id="cancel-edit-btn" class="secondary">Cancel</button>
+                    <button type="submit" id="save-edit-btn">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 

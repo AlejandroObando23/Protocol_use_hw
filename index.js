@@ -12,9 +12,10 @@ db.on("error", (error) => console.error("Error de conexión a la base de datos:"
 db.once("open", () => console.log("System connected to MongoDB."));
 
 app.use(express.json());
+app.use(express.static('public'));
 
 const customerRouter = require("./routes/customerRoutes");
 
 app.use("/customerStore", customerRouter);
 
-app.listen(port, () => console.log("Edision's Computer Store Server is running on port --> ", port));
+app.listen(port, () => console.log("Edison's Computer Store Server is running on port --> ", port));

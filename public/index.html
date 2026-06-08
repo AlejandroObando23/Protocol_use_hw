@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edison's Store</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Computer Store </h1>
+            <p>Computer Store </p>
+        </header>
+
+        <main>
+            <div class="summary">
+                <div class="stat-box">
+                    <span>Total Customers</span>
+                    <strong id="total-customers">-</strong>
+                </div>
+                <div class="stat-box">
+                    <span>Total Revenue</span>
+                    <strong id="total-revenue">-</strong>
+                </div>
+            </div>
+
+            <div class="search-area">
+                <select id="search-type">
+                    <option value="name">Name</option>
+                    <option value="age">Age</option>
+                </select>
+                <input type="text" id="search-input" placeholder="Search...">
+                <button id="search-btn">Search</button>
+                <button id="clear-btn" class="secondary">Clear</button>
+            </div>
+
+            <div id="search-results" class="search-results hidden"></div>
+
+            <div class="table-container">
+                <div class="table-header">
+                    <h2>Customers</h2>
+                    <button id="refresh-btn" class="secondary">Refresh</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Age</th>
+                            <th>Spent</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customers-body">
+                        <tr>
+                            <td colspan="3" class="text-center">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>

@@ -33,8 +33,16 @@ router.get("/customer/money-spent", async (req, res) => {
 
 router.get("/customer/money-spent/total", async (req, res) => {
     try {
-        const customers = await Customer.find().select("moneySpent").sum();
-        res.json(customers);
+        const result = await Customer.aggregate([
+            {
+                $group: {
+                    _id: null,
+                    totalSpent: { $sum: "$moneySpent" }
+                }
+            }
+        ]);
+        const total = result.length > 0 ? result[0].totalSpent : 0;
+        res.json({ totalSpent: total });
     }
     catch (err) {
         res.status(500).json({ message: err.message });

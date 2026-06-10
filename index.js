@@ -325,8 +325,10 @@ app.use(express.json());
 app.use(express.static('public'));
 
 const insectRouter = require("./routes/insectRoutes");
+const customerRouter = require("./routes/customerRoutes");
 
 app.use("/insectStore", insectRouter);
+app.use("/customerStore", customerRouter);
 
 // Solo escuchar si no estamos en entorno de Vercel
 if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {

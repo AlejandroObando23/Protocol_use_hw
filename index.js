@@ -12,7 +12,10 @@ const db = mongoose.connection;
 db.on("error", (error) => console.error("Error de conexión a la base de datos:", error));
 db.once("open", async () => {
     console.log("System connected to MongoDB.");
-    await seedInsects();
+    // Solo sembrar la base de datos si corremos de forma local
+    if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+        await seedInsects();
+    }
 });
 
 // Seed data function

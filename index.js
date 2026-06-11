@@ -6,19 +6,31 @@ const Insect = require("./models/insect");
 
 const mongoURI = process.env.MONGODB_URI || "mongodb+srv://root123:root123@cluster0.0s6q0vr.mongodb.net/?appName=Cluster0";
 
-mongoose.connect(mongoURI, {
-    serverSelectionTimeoutMS: 5000 // Evita que la función de Vercel se quede colgada si no conecta
-});
+let cachedConnectionPromise = null;
 
-const db = mongoose.connection;
-db.on("error", (error) => console.error("Error de conexión a la base de datos:", error));
-db.once("open", async () => {
-    console.log("System connected to MongoDB.");
-    // Solo sembrar la base de datos si corremos de forma local (no en Vercel)
-    if (!process.env.VERCEL) {
-        await seedInsects();
+async function connectDB() {
+    if (mongoose.connection.readyState === 1) {
+        return;
     }
-});
+    if (!cachedConnectionPromise) {
+        console.log("Iniciando conexión a MongoDB...");
+        cachedConnectionPromise = mongoose.connect(mongoURI, {
+            serverSelectionTimeoutMS: 5000,
+            connectTimeoutMS: 5000
+        }).then(async (m) => {
+            console.log("System connected to MongoDB.");
+            // Solo sembrar la base de datos si corremos de forma local (no en Vercel)
+            if (!process.env.VERCEL) {
+                await seedInsects();
+            }
+            return m;
+        }).catch((err) => {
+            cachedConnectionPromise = null; // Reiniciar si falla
+            throw err;
+        });
+    }
+    await cachedConnectionPromise;
+}
 
 // Seed data function
 async function seedInsects() {
@@ -350,11 +362,25 @@ app.get("/debug-db", (req, res) => {
 });
 
 
+const dbMiddleware = async (req, res, next) => {
+    try {
+        await connectDB();
+        next();
+    } catch (err) {
+        console.error("Error de conexión a la base de datos:", err.message);
+        res.status(500).json({
+            message: "Error de conexión a la base de datos (MongoDB Atlas)",
+            error: err.message,
+            tip: "Asegúrate de haber añadido la IP 0.0.0.0/0 (permitir acceso desde cualquier lugar) en el panel Network Access de MongoDB Atlas."
+        });
+    }
+};
+
 const insectRouter = require("./routes/insectRoutes");
 const customerRouter = require("./routes/customerRoutes");
 
-app.use("/insectStore", insectRouter);
-app.use("/customerStore", customerRouter);
+app.use("/insectStore", dbMiddleware, insectRouter);
+app.use("/customerStore", dbMiddleware, customerRouter);
 
 // Solo escuchar si no estamos en entorno de Vercel
 if (!process.env.VERCEL) {

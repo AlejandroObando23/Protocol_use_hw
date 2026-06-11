@@ -6,14 +6,16 @@ const Insect = require("./models/insect");
 
 const mongoURI = process.env.MONGODB_URI || "mongodb+srv://root123:root123@cluster0.0s6q0vr.mongodb.net/?appName=Cluster0";
 
-mongoose.connect(mongoURI);
+mongoose.connect(mongoURI, {
+    serverSelectionTimeoutMS: 5000 // Evita que la función de Vercel se quede colgada si no conecta
+});
 
 const db = mongoose.connection;
 db.on("error", (error) => console.error("Error de conexión a la base de datos:", error));
 db.once("open", async () => {
     console.log("System connected to MongoDB.");
-    // Solo sembrar la base de datos si corremos de forma local
-    if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+    // Solo sembrar la base de datos si corremos de forma local (no en Vercel)
+    if (!process.env.VERCEL) {
         await seedInsects();
     }
 });
@@ -324,6 +326,39 @@ async function seedInsects() {
 app.use(express.json());
 app.use(express.static('public'));
 
+// Endpoint de diagnóstico para validar la conexión a la base de datos en Vercel
+app.get("/debug-db", async (req, res) => {
+    const states = {
+        0: "disconnected",
+        1: "connected",
+        2: "connecting",
+        3: "disconnecting"
+    };
+    const readyState = mongoose.connection.readyState;
+    const maskedURI = mongoURI.replace(/:([^@]+)@/, ":******@");
+
+    let dbError = null;
+    if (readyState !== 1) {
+        try {
+            await mongoose.connect(mongoURI, { serverSelectionTimeoutMS: 3000 });
+        } catch (err) {
+            dbError = err.message;
+        }
+    }
+
+    res.json({
+        status: states[mongoose.connection.readyState] || "unknown",
+        readyState,
+        maskedURI,
+        dbError,
+        env: {
+            NODE_ENV: process.env.NODE_ENV,
+            VERCEL: process.env.VERCEL,
+            PORT: process.env.PORT
+        }
+    });
+});
+
 const insectRouter = require("./routes/insectRoutes");
 const customerRouter = require("./routes/customerRoutes");
 
@@ -331,7 +366,7 @@ app.use("/insectStore", insectRouter);
 app.use("/customerStore", customerRouter);
 
 // Solo escuchar si no estamos en entorno de Vercel
-if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+if (!process.env.VERCEL) {
     app.listen(port, () => console.log("Insect Store Server is running on port --> ", port));
 }
 

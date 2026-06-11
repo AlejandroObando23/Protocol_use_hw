@@ -327,7 +327,7 @@ app.use(express.json());
 app.use(express.static('public'));
 
 // Endpoint de diagnóstico para validar la conexión a la base de datos en Vercel
-app.get("/debug-db", async (req, res) => {
+app.get("/debug-db", (req, res) => {
     const states = {
         0: "disconnected",
         1: "connected",
@@ -337,20 +337,10 @@ app.get("/debug-db", async (req, res) => {
     const readyState = mongoose.connection.readyState;
     const maskedURI = mongoURI.replace(/:([^@]+)@/, ":******@");
 
-    let dbError = null;
-    if (readyState !== 1) {
-        try {
-            await mongoose.connect(mongoURI, { serverSelectionTimeoutMS: 3000 });
-        } catch (err) {
-            dbError = err.message;
-        }
-    }
-
     res.json({
-        status: states[mongoose.connection.readyState] || "unknown",
+        status: states[readyState] || "unknown",
         readyState,
         maskedURI,
-        dbError,
         env: {
             NODE_ENV: process.env.NODE_ENV,
             VERCEL: process.env.VERCEL,
@@ -358,6 +348,7 @@ app.get("/debug-db", async (req, res) => {
         }
     });
 });
+
 
 const insectRouter = require("./routes/insectRoutes");
 const customerRouter = require("./routes/customerRoutes");

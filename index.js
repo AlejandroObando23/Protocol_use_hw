@@ -377,10 +377,8 @@ const dbMiddleware = async (req, res, next) => {
 };
 
 const insectRouter = require("./routes/insectRoutes");
-const customerRouter = require("./routes/customerRoutes");
 
 app.use("/insectStore", dbMiddleware, insectRouter);
-app.use("/customerStore", dbMiddleware, customerRouter);
 
 // Solo escuchar si no estamos en entorno de Vercel
 if (!process.env.VERCEL) {

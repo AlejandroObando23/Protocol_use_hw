@@ -1,119 +1,99 @@
 <!DOCTYPE html>
-<html lang="es">
-
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edison's Store</title>
+    <title>Insect Store & Directory</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-
 <body>
     <div class="container">
         <header>
-            <h1>Computer Store </h1>
-            <p>Computer Store </p>
+            <div class="header-main">
+                <h1>Insect Store & Directory</h1>
+                <p>Explore, search, and manage the collection of insect specimens.</p>
+            </div>
         </header>
 
         <main>
+            <!-- Stats overview card grid -->
             <div class="summary">
                 <div class="stat-box">
-                    <span>Total Customers</span>
-                    <strong id="total-customers">-</strong>
+                    <span>Total Species</span>
+                    <strong id="total-insects">-</strong>
                 </div>
                 <div class="stat-box">
-                    <span>Total Revenue</span>
-                    <strong id="total-revenue">-</strong>
+                    <span>Small (<15mm)</span>
+                    <strong id="small-count">-</strong>
+                </div>
+                <div class="stat-box">
+                    <span>Medium (15-50mm)</span>
+                    <strong id="medium-count">-</strong>
+                </div>
+                <div class="stat-box">
+                    <span>Large (>50mm)</span>
+                    <strong id="large-count">-</strong>
                 </div>
             </div>
 
-            <div class="add-customer-card">
-                <h2>Add New Customer</h2>
-                <form id="add-form" class="customer-form">
-                    <div class="form-group">
-                        <label for="add-id">ID</label>
-                        <input type="number" id="add-id" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="add-name">Name</label>
-                        <input type="text" id="add-name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="add-age">Age</label>
-                        <input type="number" id="add-age" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="add-spent">Money Spent ($)</label>
-                        <input type="number" id="add-spent" required step="0.01">
-                    </div>
-                    <button type="submit" id="add-submit-btn">Add Customer</button>
-                </form>
+            <!-- Filters and Actions panel -->
+            <div class="control-panel">
+                <div class="search-bar">
+                    <input type="text" id="search-input" placeholder="Search by name, scientific name, order, family...">
+                </div>
+                <div class="category-action">
+                    <select id="category-select">
+                        <option value="" disabled selected>Select size category...</option>
+                        <option value="small">Small (<15mm)</option>
+                        <option value="medium">Medium (15-50mm)</option>
+                        <option value="large">Large (>50mm)</option>
+                    </select>
+                    <button id="delete-category-btn" class="danger-btn">Delete Category</button>
+                </div>
             </div>
 
-            <div class="search-area">
-                <select id="search-type">
-                    <option value="name">Name</option>
-                    <option value="age">Age</option>
-                </select>
-                <input type="text" id="search-input" placeholder="Search...">
-                <button id="search-btn">Search</button>
-                <button id="clear-btn" class="secondary">Clear</button>
-            </div>
-
-            <div id="search-results" class="search-results hidden"></div>
-
+            <!-- Insects List Table -->
             <div class="table-container">
                 <div class="table-header">
-                    <h2>Customers</h2>
-                    <button id="refresh-btn" class="secondary">Refresh</button>
+                    <h2>Specimens List</h2>
+                    <button id="refresh-btn" class="secondary">Refresh Data</button>
                 </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Age</th>
-                            <th>Spent</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="customers-body">
-                        <tr>
-                            <td colspan="4" class="text-center">Loading...</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Common Name</th>
+                                <th>Scientific Name</th>
+                                <th>Taxonomy (Order / Family)</th>
+                                <th class="text-right">Wingspan</th>
+                                <th class="text-right">Length</th>
+                                <th class="text-right">Ratio (W/L)</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="insects-body">
+                            <tr>
+                                <td colspan="7" class="text-center">Loading insects data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </main>
     </div>
-
-    <!-- Edit Modal -->
-    <div id="edit-modal" class="modal hidden">
+    <!-- Custom Confirm Modal -->
+    <div id="confirm-modal" class="modal hidden">
         <div class="modal-content">
-            <h2>Edit Customer</h2>
-            <form id="edit-form" class="customer-form modal-form">
-                <input type="hidden" id="edit-id">
-                <div class="form-group">
-                    <label for="edit-name">Name</label>
-                    <input type="text" id="edit-name" required>
-                </div>
-                <div class="form-group">
-                    <label for="edit-age">Age</label>
-                    <input type="number" id="edit-age" required>
-                </div>
-                <div class="form-group">
-                    <label for="edit-spent">Money Spent ($)</label>
-                    <input type="number" id="edit-spent" required step="0.01">
-                </div>
-                <div class="modal-actions">
-                    <button type="button" id="cancel-edit-btn" class="secondary">Cancel</button>
-                    <button type="submit" id="save-edit-btn">Save Changes</button>
-                </div>
-            </form>
+            <h2 id="confirm-title">Confirm Action</h2>
+            <p id="confirm-message">Are you sure you want to proceed?</p>
+            <div class="modal-actions">
+                <button id="confirm-cancel-btn" class="secondary">Cancel</button>
+                <button id="confirm-ok-btn" class="danger-btn">Delete</button>
+            </div>
         </div>
     </div>
 
     <script src="script.js"></script>
 </body>
-
 </html>

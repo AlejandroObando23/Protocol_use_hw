@@ -1,221 +1,209 @@
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
-    const totalCustomersEl = document.getElementById('total-customers');
-    const totalRevenueEl = document.getElementById('total-revenue');
-    const customersBody = document.getElementById('customers-body');
+    const totalInsectsEl = document.getElementById('total-insects');
+    const smallCountEl = document.getElementById('small-count');
+    const mediumCountEl = document.getElementById('medium-count');
+    const largeCountEl = document.getElementById('large-count');
+    const insectsBody = document.getElementById('insects-body');
 
-    const searchType = document.getElementById('search-type');
     const searchInput = document.getElementById('search-input');
-    const searchBtn = document.getElementById('search-btn');
-    const clearBtn = document.getElementById('clear-btn');
-    const searchResults = document.getElementById('search-results');
+    const categorySelect = document.getElementById('category-select');
+    const deleteCategoryBtn = document.getElementById('delete-category-btn');
     const refreshBtn = document.getElementById('refresh-btn');
 
-    const addForm = document.getElementById('add-form');
-    const editModal = document.getElementById('edit-modal');
-    const editForm = document.getElementById('edit-form');
-    const cancelEditBtn = document.getElementById('cancel-edit-btn');
+    // Custom Confirm Modal Elements
+    const confirmModal = document.getElementById('confirm-modal');
+    const confirmTitle = document.getElementById('confirm-title');
+    const confirmMessage = document.getElementById('confirm-message');
+    const confirmCancelBtn = document.getElementById('confirm-cancel-btn');
+    const confirmOkBtn = document.getElementById('confirm-ok-btn');
+    
+    let onConfirmCallback = null;
 
-    const API_BASE = '/customerStore';
+    const API_BASE = '/insectStore';
+    let insectsData = [];
 
-    const formatMoney = (amount) => {
-        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
-    };
-
+    // Initialize application
     const init = async () => {
-        await loadStats();
-        await loadAllCustomers();
+        await fetchAndRender();
     };
 
-    const loadStats = async () => {
-        try {
-            const countRes = await fetch(`${API_BASE}/customer/count`);
-            const countData = await countRes.json();
-            totalCustomersEl.textContent = countData || 0;
+    // Helper: custom confirm
+    const showConfirm = (title, message, callback) => {
+        confirmTitle.textContent = title;
+        confirmMessage.textContent = message;
+        onConfirmCallback = callback;
+        confirmModal.classList.remove('hidden');
+    };
 
-            const summaryRes = await fetch(`${API_BASE}/customer/summary`);
-            if (summaryRes.ok) {
-                const summaryData = await summaryRes.json();
-                const total = summaryData.reduce((acc, curr) => acc + (curr.totalSpent || 0), 0);
-                totalRevenueEl.textContent = formatMoney(total);
-            }
+    const hideConfirm = () => {
+        confirmModal.classList.add('hidden');
+        onConfirmCallback = null;
+    };
+
+    confirmCancelBtn.addEventListener('click', hideConfirm);
+    confirmOkBtn.addEventListener('click', async () => {
+        if (onConfirmCallback) {
+            await onConfirmCallback();
+        }
+        hideConfirm();
+    });
+
+    // Fetch all insect data and render stats + table
+    const fetchAndRender = async () => {
+        try {
+            insectsBody.innerHTML = '<tr><td colspan="7" class="text-center">Loading specimens...</td></tr>';
+            
+            const res = await fetch(`${API_BASE}/insect`);
+            if (!res.ok) throw new Error('Failed to fetch insects');
+            
+            insectsData = await res.json();
+            
+            updateStats();
+            renderTable(insectsData);
         } catch (error) {
-            totalCustomersEl.textContent = 'Error';
-            totalRevenueEl.textContent = 'Error';
+            console.error(error);
+            insectsBody.innerHTML = '<tr><td colspan="7" class="text-center" style="color: var(--danger);">Error loading data. Make sure the database is connected.</td></tr>';
         }
     };
 
-    const loadAllCustomers = async () => {
-        try {
-            customersBody.innerHTML = '<tr><td colspan="4" class="text-center">Loading data...</td></tr>';
+    // Calculate and update stats boxes
+    const updateStats = () => {
+        totalInsectsEl.textContent = insectsData.length;
+        
+        let small = 0;
+        let medium = 0;
+        let large = 0;
 
-            const res = await fetch(`${API_BASE}/customer`);
-            const data = await res.json();
+        insectsData.forEach(insect => {
+            const len = insect.body_length_mm;
+            if (len < 15) small++;
+            else if (len <= 50) medium++;
+            else large++;
+        });
 
-            customersBody.innerHTML = '';
-
-            if (data.length === 0) {
-                customersBody.innerHTML = '<tr><td colspan="4" class="text-center">No customers found.</td></tr>';
-                return;
-            }
-
-            data.forEach(customer => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${customer.name}</td>
-                    <td>${customer.age}</td>
-                    <td>${formatMoney(customer['moneySpent'])}</td>
-                    <td>
-                        <button class="action-btn btn-edit" data-id="${customer.id}" data-name="${customer.name}" data-age="${customer.age}" data-spent="${customer.moneySpent}">Edit</button>
-                        <button class="action-btn btn-delete" data-id="${customer.id}">Delete</button>
-                    </td>
-                `;
-                customersBody.appendChild(tr);
-            });
-        } catch (error) {
-            customersBody.innerHTML = '<tr><td colspan="4" class="text-center" style="color:red;">Error connecting to API.</td></tr>';
-        }
+        smallCountEl.textContent = small;
+        mediumCountEl.textContent = medium;
+        largeCountEl.textContent = large;
     };
 
-    const performSearch = async () => {
-        const type = searchType.value;
-        const term = searchInput.value.trim();
+    // Render table with the given list of insects
+    const renderTable = (list) => {
+        insectsBody.innerHTML = '';
 
-        if (!term) return;
+        if (list.length === 0) {
+            insectsBody.innerHTML = '<tr><td colspan="7" class="text-center">No specimens match your search.</td></tr>';
+            return;
+        }
 
-        searchResults.innerHTML = 'Searching...';
-        searchResults.classList.remove('hidden');
-
-        try {
-            const res = await fetch(`${API_BASE}/customer/${type}/${term}`);
-
-            if (res.status === 404) {
-                searchResults.innerHTML = `<span style="color:red;">No customer found.</span>`;
-                return;
-            }
-
-            const data = await res.json();
-
-            searchResults.innerHTML = `
-                <div>
-                    <strong>Name:</strong> ${data.name} <br>
-                    <strong>Age:</strong> ${data.age} <br>
-                    <strong>Spent:</strong> ${formatMoney(data['moneySpent'])}
-                </div>
+        list.forEach(insect => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>
+                    <div class="name-container">
+                        <span class="common-name">${insect.common_name}</span>
+                    </div>
+                </td>
+                <td class="scientific-name">${insect.scientific_name}</td>
+                <td>
+                    <span class="taxonomy-badge order-badge">${insect.order}</span>
+                    <span class="taxonomy-badge family-badge">${insect.family}</span>
+                </td>
+                <td class="text-right font-mono">${insect.wingspan_mm} mm</td>
+                <td class="text-right font-mono">${insect.body_length_mm} mm</td>
+                <td class="text-right font-mono">${insect.wingspan_to_body_ratio || (insect.wingspan_mm / insect.body_length_mm).toFixed(2)}</td>
+                <td class="text-center">
+                    <button class="action-btn btn-delete" data-id="${insect.id}" title="Delete specimen">Delete</button>
+                </td>
             `;
-
-        } catch (error) {
-            searchResults.innerHTML = '<span style="color:red;">Error performing search.</span>';
-        }
+            insectsBody.appendChild(tr);
+        });
     };
 
-    searchBtn.addEventListener('click', performSearch);
-
-    searchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') performSearch();
-    });
-
-    clearBtn.addEventListener('click', () => {
-        searchInput.value = '';
-        searchResults.classList.add('hidden');
-        searchResults.innerHTML = '';
-    });
-
-    refreshBtn.addEventListener('click', () => {
-        loadStats();
-        loadAllCustomers();
-    });
-
-    // Add Customer Form Submit
-    addForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const customerData = {
-            id: Number(document.getElementById('add-id').value),
-            name: document.getElementById('add-name').value,
-            age: Number(document.getElementById('add-age').value),
-            moneySpent: Number(document.getElementById('add-spent').value)
-        };
-
-        try {
-            const res = await fetch(`${API_BASE}/customer`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(customerData)
-            });
-            if (res.ok) {
-                addForm.reset();
-                init();
-            } else {
-                alert('Failed to add customer.');
-            }
-        } catch (err) {
-            console.error(err);
-            alert('Error adding customer.');
+    // Real-time client-side search filtering
+    searchInput.addEventListener('input', () => {
+        const query = searchInput.value.toLowerCase().trim();
+        if (!query) {
+            renderTable(insectsData);
+            return;
         }
+
+        const filtered = insectsData.filter(insect => {
+            return (
+                (insect.common_name && insect.common_name.toLowerCase().includes(query)) ||
+                (insect.scientific_name && insect.scientific_name.toLowerCase().includes(query)) ||
+                (insect.order && insect.order.toLowerCase().includes(query)) ||
+                (insect.family && insect.family.toLowerCase().includes(query))
+            );
+        });
+        renderTable(filtered);
     });
 
-    // Table Actions (Edit & Delete via Event Delegation)
-    customersBody.addEventListener('click', async (e) => {
+    // Delete single insect by ID (with custom confirm)
+    insectsBody.addEventListener('click', (e) => {
         if (e.target.classList.contains('btn-delete')) {
             const id = e.target.getAttribute('data-id');
-            if (confirm('Are you sure you want to delete this customer?')) {
-                try {
-                    const res = await fetch(`${API_BASE}/customer/${id}`, { method: 'DELETE' });
-                    if (res.ok) {
-                        init();
-                    } else {
-                        alert('Failed to delete customer.');
+            const commonName = e.target.closest('tr').querySelector('.common-name').textContent;
+            
+            showConfirm(
+                'Delete Specimen',
+                `Are you sure you want to delete the "${commonName}" (ID: ${id}) from the database?`,
+                async () => {
+                    try {
+                        const res = await fetch(`${API_BASE}/insect/${id}`, {
+                            method: 'DELETE'
+                        });
+                        if (res.ok) {
+                            await fetchAndRender();
+                        } else {
+                            const errData = await res.json();
+                            alert(`Error: ${errData.message || 'Could not delete specimen'}`);
+                        }
+                    } catch (error) {
+                        console.error(error);
+                        alert('Network error trying to delete specimen.');
                     }
-                } catch (err) {
-                    console.error(err);
+                }
+            );
+        }
+    });
+
+    // Delete insects by size category (with custom confirm)
+    deleteCategoryBtn.addEventListener('click', () => {
+        const category = categorySelect.value;
+        if (!category) {
+            alert('Please select a size category to delete.');
+            return;
+        }
+
+        showConfirm(
+            'Delete Size Category',
+            `WARNING: Are you sure you want to delete ALL insects in the "${category.toUpperCase()}" category?`,
+            async () => {
+                try {
+                    const res = await fetch(`${API_BASE}/insect/size/${category}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    const result = await res.json();
+                    if (res.ok) {
+                        alert(result.message || `Deleted ${result.count} insects successfully.`);
+                        categorySelect.selectedIndex = 0; // reset select
+                        await fetchAndRender();
+                    } else {
+                        alert(`Error: ${result.message || 'Could not delete category'}`);
+                    }
+                } catch (error) {
+                    console.error(error);
+                    alert('Network error trying to delete category.');
                 }
             }
-        } else if (e.target.classList.contains('btn-edit')) {
-            const id = e.target.getAttribute('data-id');
-            const name = e.target.getAttribute('data-name');
-            const age = e.target.getAttribute('data-age');
-            const spent = e.target.getAttribute('data-spent');
-
-            document.getElementById('edit-id').value = id;
-            document.getElementById('edit-name').value = name;
-            document.getElementById('edit-age').value = age;
-            document.getElementById('edit-spent').value = spent;
-
-            editModal.classList.remove('hidden');
-        }
+        );
     });
 
-    // Modal Actions
-    cancelEditBtn.addEventListener('click', () => {
-        editModal.classList.add('hidden');
-    });
+    // Refresh list manually
+    refreshBtn.addEventListener('click', fetchAndRender);
 
-    editForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const id = document.getElementById('edit-id').value;
-        const customerData = {
-            name: document.getElementById('edit-name').value,
-            age: Number(document.getElementById('edit-age').value),
-            moneySpent: Number(document.getElementById('edit-spent').value)
-        };
-
-        try {
-            const res = await fetch(`${API_BASE}/customer/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(customerData)
-            });
-            if (res.ok) {
-                editModal.classList.add('hidden');
-                init();
-            } else {
-                alert('Failed to update customer.');
-            }
-        } catch (err) {
-            console.error(err);
-            alert('Error updating customer.');
-        }
-    });
-
+    // Run app
     init();
 });

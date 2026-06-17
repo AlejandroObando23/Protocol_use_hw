@@ -1,7 +1,7 @@
 const Insect = require("../models/insect");
 
 class InsectController {
-    // Clasifica una lista de insectos según su longitud corporal
+
     classifyBySize(insects) {
         const classified = {
             small: [],

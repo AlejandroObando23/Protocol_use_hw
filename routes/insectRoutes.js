@@ -1,17 +1,18 @@
 const express = require("express");
 const router = express.Router();
-const insectController = require("../controllers/insectController");
+const notebookController = require("../controllers/insectController");
 
-// Endpoint para obtener todos los insectos
-router.get("/insect", (req, res) => insectController.getAll(req, res));
+// Endpoint para obtener todos los cuadernos
+router.get("/notebook", (req, res) => notebookController.getAll(req, res));
 
-// Endpoint para obtener todos los insectos agrupados por tamaño
-router.get("/insect/size", (req, res) => insectController.getBySize(req, res));
+// Endpoint para obtener todos los cuadernos agrupados por tamaño
+router.get("/notebook/size", (req, res) => notebookController.getBySize(req, res));
 
-// Endpoint para eliminar insectos por categoría de tamaño (small, medium, large)
-router.delete("/insect/size/:sizeType", (req, res) => insectController.deleteByCategory(req, res));
+// Endpoint para eliminar cuadernos por categoría de tamaño (small, medium, large)
+router.delete("/notebook/size/:sizeType", (req, res) => notebookController.deleteByCategory(req, res));
 
-// Endpoint para eliminar un insecto por su id numérico
-router.delete("/insect/:id", (req, res) => insectController.deleteById(req, res));
+// Endpoint para eliminar un cuaderno por su id numérico
+router.delete("/notebook/:id", (req, res) => notebookController.deleteById(req, res));
 
 module.exports = router;
+

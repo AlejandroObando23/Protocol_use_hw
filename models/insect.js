@@ -1,31 +1,28 @@
 const mongoose = require("mongoose");
 
-const insectSchema = new mongoose.Schema(
-{
-    id: { type: Number, required: true, unique: true },
-    common_name: { type: String, required: true },
-    scientific_name: { type: String, required: true },
-    order: { type: String, required: true },
-    family: { type: String, required: true },
-    wingspan_mm: { type: Number, required: true },
-    body_length_mm: { type: Number, required: true },
-    characteristics: {
-        habitat: { type: String, required: true },
-        diet: { type: String, required: true },
-        fun_fact: { type: String, required: true }
+const notebook = new mongoose.Schema(
+    {
+        id: { type: Number, required: true, unique: true },
+        name: { type: String, required: true },
+        type: { type: String, required: true },
+        size_leaves: { type: String, required: true },
+        cost: { type: String, required: true },
+        brand: { type: Number, required: true }
+    },
+    {
+        collection: "notebook",
+        toJSON: { virtuals: true },
+        toObject: { virtuals: true }
     }
-},
-{ 
-    collection: "Insects",
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true }
-}
 );
 
-// Virtual for ratio: wingspan_mm / body_length_mm
-insectSchema.virtual("wingspan_to_body_ratio").get(function() {
-    if (!this.body_length_mm) return 0;
-    return Number((this.wingspan_mm / this.body_length_mm).toFixed(2));
+// Virtual for cost per leaf ratio: cost / size_leaves
+notebook.virtual("cost_per_leaf").get(function() {
+    const numericCost = parseFloat(this.cost.replace(/[^0-9.]/g, ''));
+    const numericLeaves = parseInt(this.size_leaves, 10);
+    if (!numericLeaves || isNaN(numericCost)) return 0;
+    return Number((numericCost / numericLeaves).toFixed(4));
 });
 
-module.exports = mongoose.model("Insect", insectSchema);
+module.exports = mongoose.model("notebook", notebook);
+

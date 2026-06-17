@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Insect Store & Directory</title>
+    <title>Notebook Store & Directory</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -11,8 +11,8 @@
     <div class="container">
         <header>
             <div class="header-main">
-                <h1>Insect Store & Directory</h1>
-                <p>Explore, search, and manage the collection of insect specimens.</p>
+                <h1>Notebook Store & Directory</h1>
+                <p>Explore, search, and manage the collection of notebook models.</p>
             </div>
         </header>
 
@@ -20,19 +20,19 @@
             <!-- Stats overview card grid -->
             <div class="summary">
                 <div class="stat-box">
-                    <span>Total Species</span>
-                    <strong id="total-insects">-</strong>
+                    <span>Total Notebooks</span>
+                    <strong id="total-notebooks">-</strong>
                 </div>
                 <div class="stat-box">
-                    <span>Small (<15mm)</span>
+                    <span>Small (<80 leaves)</span>
                     <strong id="small-count">-</strong>
                 </div>
                 <div class="stat-box">
-                    <span>Medium (15-50mm)</span>
+                    <span>Medium (80-150 leaves)</span>
                     <strong id="medium-count">-</strong>
                 </div>
                 <div class="stat-box">
-                    <span>Large (>50mm)</span>
+                    <span>Large (>150 leaves)</span>
                     <strong id="large-count">-</strong>
                 </div>
             </div>
@@ -40,41 +40,41 @@
             <!-- Filters and Actions panel -->
             <div class="control-panel">
                 <div class="search-bar">
-                    <input type="text" id="search-input" placeholder="Search by name, scientific name, order, family...">
+                    <input type="text" id="search-input" placeholder="Search by name, type, brand...">
                 </div>
                 <div class="category-action">
                     <select id="category-select">
-                        <option value="" disabled selected>Select size category...</option>
-                        <option value="small">Small (<15mm)</option>
-                        <option value="medium">Medium (15-50mm)</option>
-                        <option value="large">Large (>50mm)</option>
+                        <option value="" disabled selected>Select page category...</option>
+                        <option value="small">Small (<80 leaves)</option>
+                        <option value="medium">Medium (80-150 leaves)</option>
+                        <option value="large">Large (>150 leaves)</option>
                     </select>
                     <button id="delete-category-btn" class="danger-btn">Delete Category</button>
                 </div>
             </div>
 
-            <!-- Insects List Table -->
+            <!-- Notebooks List Table -->
             <div class="table-container">
                 <div class="table-header">
-                    <h2>Specimens List</h2>
+                    <h2>Notebooks List</h2>
                     <button id="refresh-btn" class="secondary">Refresh Data</button>
                 </div>
                 <div class="table-wrapper">
                     <table>
                         <thead>
                             <tr>
-                                <th>Common Name</th>
-                                <th>Scientific Name</th>
-                                <th>Taxonomy (Order / Family)</th>
-                                <th class="text-right">Wingspan</th>
-                                <th class="text-right">Length</th>
-                                <th class="text-right">Ratio (W/L)</th>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Brand</th>
+                                <th class="text-right">Leaves</th>
+                                <th class="text-right">Cost</th>
+                                <th class="text-right">Cost per Leaf</th>
                                 <th class="text-center">Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="insects-body">
+                        <tbody id="notebooks-body">
                             <tr>
-                                <td colspan="7" class="text-center">Loading insects data...</td>
+                                <td colspan="7" class="text-center">Loading notebooks data...</td>
                             </tr>
                         </tbody>
                     </table>

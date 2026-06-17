@@ -1,68 +1,68 @@
-const Insect = require("../models/insect");
+const Notebook = require("../models/insect");
 
-class InsectController {
+class NotebookController {
 
-    classifyBySize(insects) {
+    classifyBySize(notebooks) {
         const classified = {
             small: [],
             medium: [],
             large: []
         };
 
-        insects.forEach(insect => {
-            const length = insect.body_length_mm;
-            if (length < 15) {
-                classified.small.push(insect);
-            } else if (length <= 50) {
-                classified.medium.push(insect);
+        notebooks.forEach(notebook => {
+            const leaves = parseInt(notebook.size_leaves, 10) || 0;
+            if (leaves < 80) {
+                classified.small.push(notebook);
+            } else if (leaves <= 150) {
+                classified.medium.push(notebook);
             } else {
-                classified.large.push(insect);
+                classified.large.push(notebook);
             }
         });
 
         return classified;
     }
 
-    // Obtiene todos los insectos
+    // Obtiene todos los cuadernos
     async getAll(req, res) {
         try {
-            const insects = await Insect.find();
-            res.json(insects);
+            const notebooks = await Notebook.find();
+            res.json(notebooks);
         } catch (err) {
             res.status(500).json({ message: err.message });
         }
     }
 
-    // Obtiene todos los insectos agrupados por categoría de tamaño
+    // Obtiene todos los cuadernos agrupados por categoría de tamaño
     async getBySize(req, res) {
         try {
-            const allInsects = await Insect.find();
-            const classified = this.classifyBySize(allInsects);
+            const allNotebooks = await Notebook.find();
+            const classified = this.classifyBySize(allNotebooks);
             res.json(classified);
         } catch (err) {
             res.status(500).json({ message: err.message });
         }
     }
 
-    // Elimina un insecto por su ID numérico
+    // Elimina un cuaderno por su ID numérico
     async deleteById(req, res) {
         try {
-            const insectId = Number(req.params.id);
-            if (isNaN(insectId)) {
-                return res.status(400).json({ message: "Invalid insect ID format" });
+            const notebookId = Number(req.params.id);
+            if (isNaN(notebookId)) {
+                return res.status(400).json({ message: "Invalid notebook ID format" });
             }
 
-            const deletedInsect = await Insect.findOneAndDelete({ id: insectId });
-            if (deletedInsect == null) {
-                return res.status(404).json({ message: "Insect not found" });
+            const deletedNotebook = await Notebook.findOneAndDelete({ id: notebookId });
+            if (deletedNotebook == null) {
+                return res.status(404).json({ message: "Notebook not found" });
             }
-            res.json({ message: "Insect deleted successfully", deletedInsect });
+            res.json({ message: "Notebook deleted successfully", deletedNotebook });
         } catch (err) {
             res.status(500).json({ message: err.message });
         }
     }
 
-    // Elimina todos los insectos de una categoría de tamaño determinada (small, medium o large)
+    // Elimina todos los cuadernos de una categoría de tamaño determinada (small, medium o large)
     async deleteByCategory(req, res) {
         try {
             const sizeType = req.params.sizeType.toLowerCase();
@@ -70,29 +70,29 @@ class InsectController {
                 return res.status(400).json({ message: "Invalid size category. Use small, medium, or large." });
             }
 
-            // Obtener todos los insectos
-            const allInsects = await Insect.find();
+            // Obtener todos los cuadernos
+            const allNotebooks = await Notebook.find();
 
             // Clasificar usando el método de instancia
-            const classified = this.classifyBySize(allInsects);
+            const classified = this.classifyBySize(allNotebooks);
 
-            // Obtener insectos correspondientes a la categoría seleccionada
-            const insectsToDelete = classified[sizeType];
+            // Obtener cuadernos correspondientes a la categoría seleccionada
+            const notebooksToDelete = classified[sizeType];
 
-            if (insectsToDelete.length === 0) {
-                return res.status(404).json({ message: `No insects found in the '${sizeType}' category.` });
+            if (notebooksToDelete.length === 0) {
+                return res.status(404).json({ message: `No notebooks found in the '${sizeType}' category.` });
             }
 
             // Extraer IDs a eliminar
-            const idsToDelete = insectsToDelete.map(insect => insect.id);
+            const idsToDelete = notebooksToDelete.map(notebook => notebook.id);
 
             // Eliminar de la base de datos
-            await Insect.deleteMany({ id: { $in: idsToDelete } });
+            await Notebook.deleteMany({ id: { $in: idsToDelete } });
 
             res.json({
-                message: `Insects in category '${sizeType}' deleted successfully`,
-                count: insectsToDelete.length,
-                deletedInsects: insectsToDelete
+                message: `Notebooks in category '${sizeType}' deleted successfully`,
+                count: notebooksToDelete.length,
+                deletedNotebooks: notebooksToDelete
             });
         } catch (err) {
             res.status(500).json({ message: err.message });
@@ -101,4 +101,5 @@ class InsectController {
 }
 
 // Exportamos una instancia del controlador
-module.exports = new InsectController();
+module.exports = new NotebookController();
+
